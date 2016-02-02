@@ -2,48 +2,68 @@
 //  Server.swift
 //  Connection
 //
-//  Created by Jeremy Tregunna on 2016-01-28.
+//  Created by Wesley Cope on 2/2/16.
 //  Copyright © 2016 Pilot Foundation. All rights reserved.
 //
 
-import Darwin
-import Dispatch
+import Foundation
 
 public class Server {
-    var socket: Socket?
-    let acceptQueue: dispatch_queue_t
-    let acceptGroup: dispatch_group_t
-
-    public init(port: UInt16) throws {
-        socket = nil
-        // Create our own here as we'll be indirectly using barriers...let's be polite and not use one of the global queues.
-        acceptQueue = dispatch_queue_create("internal.connection.accept", DISPATCH_QUEUE_CONCURRENT)
-        acceptGroup = dispatch_group_create()
-        socket      = try Socket(family: AF_UNSPEC, port: port, nonblocking: true)
+    private var listener                = Socket(descriptor: -1)
+    private var clients:Set<Socket>     = []
+    private let semaphore               = dispatch_semaphore_create(1)
+    private let acceptQueue             = dispatch_queue_create("com.pilot.connection.accept.queue", DISPATCH_QUEUE_CONCURRENT)
+    private let handleQueue             = dispatch_queue_create("com.pilot.connection.handle.queue", nil)
+    private let acceptGroup             = dispatch_group_create()
+    
+    
+    init(port: SocketPort) throws {
+        listener                = try Socket()
+        listener.closeOnExec    = true
+        
+        try listener.bind("0.0.0.0", port: port)
+        try listener.listen(1000)
     }
-
-    // Our run loop. Yields an accepted socket.
+    
     public func serve(block: (Socket) -> Void) throws {
         dispatch_group_async(acceptGroup, acceptQueue) {
-            guard let socket = self.socket else {
-#if DEBUG
-                print("Socket is not listening for connections.")
-#endif
-                return
-            }
-
             dispatch_group_enter(self.acceptGroup)
-            do {
-                try socket.accept { socket in
-                    block(socket)
-                    dispatch_group_leave(self.acceptGroup)
+            while let incoming = try? self.listener.accept() {
+                print("Got incoming")
+                
+                self.sync {
+                    self.clients.insert(incoming)
                 }
-            } catch {
-#if DEBUG
-                print("Socket error")
-#endif
+                
+                dispatch_async(self.handleQueue) {
+                    print("Handle it")
+                    
+                    block(incoming)
+                    
+                    self.sync {
+                        self.clients.remove(incoming)
+                    }
+                };
             }
+            
+            print("AFTER WHILE LOOP");
+            self.stop()
+            dispatch_group_leave(self.acceptGroup)
         }
+        print("AFTER SERVER ");
         dispatch_group_wait(acceptGroup, DISPATCH_TIME_FOREVER)
+    }
+
+    func stop() {
+        print("Stopping")
+        
+        listener.shutdown()
+        listener.close()
+    }
+    
+    private func sync(block:Void -> Void) {
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+        block()
+        dispatch_semaphore_signal(semaphore)
     }
 }
