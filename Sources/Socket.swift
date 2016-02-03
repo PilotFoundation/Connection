@@ -41,7 +41,7 @@ public class Socket: Hashable {
     
     public var hashValue: Int { return Int(self.descriptor) }
     
-    init() throws {
+    public init() throws {
         descriptor = SocketFunctions.Create(AF_INET, SocketFunctions.STREAM, IPPROTO_TCP)
         assert(descriptor > 0)
         
@@ -51,11 +51,11 @@ public class Socket: Hashable {
         }
     }
     
-    init(descriptor:SocketDescriptor) {
+    public init(descriptor:SocketDescriptor) {
         self.descriptor = descriptor
     }
     
-    func bind(address:String, port:SocketPort) throws {
+    public func bind(address:String, port:SocketPort) throws {
         var addr        = sockaddr_in()
         addr.sin_family = sa_family_t(AF_INET)
         addr.sin_port   = in_port_t(SocketFunctions.htons(in_port_t(port)))
@@ -68,13 +68,13 @@ public class Socket: Hashable {
         }
     }
     
-    func listen(backlog:Int32 = SocketFunctions.BACKLOG) throws {
+    public func listen(backlog:Int32 = SocketFunctions.BACKLOG) throws {
         if SocketFunctions.Listen(descriptor, backlog) == -1 {
             throw SocketError()
         }
     }
     
-    func accept() throws -> Socket {
+    public func accept() throws -> Socket {
         var addr                = sockaddr()
         var length:socklen_t    = 0
         
@@ -87,7 +87,7 @@ public class Socket: Hashable {
         return Socket(descriptor:incoming)
     }
     
-    func send(message:String) {
+    public func send(message:String) {
         message.withCString { bytes in
             SocketFunctions.Send(descriptor, bytes, Int(strlen(bytes)), Int32(SocketFunctions.NOSIGNAL))
         }

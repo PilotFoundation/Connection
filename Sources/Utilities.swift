@@ -9,46 +9,45 @@
 import Foundation
 import Darwin
 
-struct SocketFunctions {
-    static let Create   = Darwin.socket
-    static let Accept   = Darwin.accept
-    static let Bind     = Darwin.bind
-    static let Close    = Darwin.close
-    static let Listen   = Darwin.listen
-    static let Read     = Darwin.read
-    static let Send     = Darwin.send
-    static let Write    = Darwin.write
-    static let Shutdown = Darwin.shutdown
-    static let Select   = Darwin.select
-    static let Pipe     = Darwin.pipe
-    static let Option   = Darwin.setsockopt
-    static let STREAM   = SOCK_STREAM
-    static let BACKLOG  = SOMAXCONN
-    static let NOSIGNAL = 0
+public struct SocketFunctions {
+    public static let Create   = Darwin.socket
+    public static let Accept   = Darwin.accept
+    public static let Bind     = Darwin.bind
+    public static let Close    = Darwin.close
+    public static let Listen   = Darwin.listen
+    public static let Read     = Darwin.read
+    public static let Send     = Darwin.send
+    public static let Write    = Darwin.write
+    public static let Shutdown = Darwin.shutdown
+    public static let Select   = Darwin.select
+    public static let Pipe     = Darwin.pipe
+    public static let Option   = Darwin.setsockopt
+    public static let STREAM   = SOCK_STREAM
+    public static let BACKLOG  = SOMAXCONN
+    public static let NOSIGNAL = 0
     
-    static func htons(value:CUnsignedShort) -> CUnsignedShort {
+    public static func htons(value:CUnsignedShort) -> CUnsignedShort {
         return (value << 8) + (value >> 8)
     }
     
-    static func AddressCast(pointer:UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<sockaddr> {
+    public static func AddressCast(pointer:UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<sockaddr> {
         return UnsafeMutablePointer<sockaddr>(pointer)
     }
 }
 
-
-struct SocketError : ErrorType, CustomStringConvertible {
-    let function:String
-    let error:Int32
+public struct SocketError : ErrorType, CustomStringConvertible {
+    public let function:String
+    public let error:Int32
     
-    init(function:String = __FUNCTION__) {
+    public init(function:String = __FUNCTION__) {
         self.function   = function
         self.error      = errno
     }
     
-    var description: String {
+    public var description: String {
         return "[Error: \(error)] - Connection.\(function) failed."
     }
 }
 
-typealias SocketDescriptor  = Int32
-typealias SocketPort        = UInt16
+public typealias SocketDescriptor  = Int32
+public typealias SocketPort        = UInt16
