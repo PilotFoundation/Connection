@@ -17,7 +17,7 @@ public class Server {
     private let acceptGroup             = dispatch_group_create()
     
     
-    init(port: SocketPort) throws {
+    public init(port: SocketPort) throws {
         listener                = try Socket()
         listener.closeOnExec    = true
         

@@ -50,5 +50,5 @@ struct SocketError : ErrorType, CustomStringConvertible {
     }
 }
 
-typealias SocketDescriptor  = Int32
-typealias SocketPort        = UInt16
+public typealias SocketDescriptor  = Int32
+public typealias SocketPort        = UInt16
