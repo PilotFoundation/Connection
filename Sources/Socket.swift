@@ -10,7 +10,10 @@ import Foundation
 import Darwin
 
 public class Socket: Hashable {
-    let descriptor:SocketDescriptor
+    public var onClose:((connection:Socket) -> Void)?
+    public var handler:((AnyObject?, Socket) -> Void)?
+    
+    public let descriptor:SocketDescriptor
     var blocking:Bool {
         get {
             return fcntl(descriptor, F_GETFL, 0) & O_NONBLOCK == 0
@@ -47,6 +50,11 @@ public class Socket: Hashable {
         
         var buffer:Int32 = 1
         guard SocketFunctions.Option(descriptor, SOL_SOCKET, SO_REUSEADDR, &buffer, socklen_t(sizeof(Int32))) != -1 else {
+            throw SocketError(function:"SocketFunctions.Option()")
+        }
+        
+        var nosig:Int32 = 1
+        guard SocketFunctions.Option(descriptor, SOL_SOCKET, SO_NOSIGPIPE, &nosig, socklen_t(sizeof(Int32))) != -1 else {
             throw SocketError(function:"SocketFunctions.Option()")
         }
     }
@@ -111,13 +119,10 @@ public class Socket: Hashable {
     }
     
     public func close() {
-        shutdown()
-        SocketFunctions.Close(descriptor)
+        SocketFunctions.Shutdown(self.descriptor, Int32(SHUT_RDWR))
+        SocketFunctions.Close(self.descriptor)
         
-    }
-    
-    public func shutdown() {
-        SocketFunctions.Shutdown(descriptor, Int32(SHUT_RDWR))
+        self.onClose?(connection:self)
     }
 }
 
