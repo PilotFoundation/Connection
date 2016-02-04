@@ -9,6 +9,10 @@
 import Foundation
 
 public class Server {
+    public let address:String
+    public let port:SocketPort
+    
+    
     private var listener    = Socket(descriptor: -1)
     private var clients     = Set<Socket>()
     private let semaphore   = dispatch_semaphore_create(1)
@@ -17,13 +21,15 @@ public class Server {
     private let handleQueue = dispatch_queue_create("com.pilot.connection.handle.queue", nil)
     private let handleGroup = dispatch_group_create()
     
-    public init(port: SocketPort) throws {
+    public init(address:String = "0.0.0.0", port: SocketPort) throws {
+        self.address    = address
+        self.port       = port
+        
         listener                = try Socket()
         listener.closeOnExec    = true
         
-        try listener.bind("0.0.0.0", port: port)
+        try listener.bind(address, port: port)
         try listener.listen(1000)
-        
     }
     
     public func serve(block: (AnyObject?, Socket) -> Void) throws {
@@ -43,7 +49,6 @@ public class Server {
             _self.stop()
         }
 
-//        NSRunLoop.mainRunLoop().run()
         dispatch_group_wait(acceptGroup, DISPATCH_TIME_FOREVER)
     }
 

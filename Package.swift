@@ -5,5 +5,5 @@ let package = Package(
     name:           "Connection",
     targets:        [],
     dependencies:   [],
-    exclude: ["main.swift", "Sources/main.swift",]
+    exclude:        ["Connection.xcodeproj", "main.swift", "Sources/main.swift",]
 )

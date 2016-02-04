@@ -8,12 +8,10 @@
 
 import Foundation
 
-print("Starting Server")
-
 do {
     let server = try Server(port:8080)
 
-    print("Server started on port 8080...")
+    print("Server running at \(server.address) : \(server.port)")
     try server.serve { (str, connection) in
         
         if let str = str as? String {
