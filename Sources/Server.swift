@@ -43,7 +43,8 @@ public class Server {
             _self.stop()
         }
 
-        NSRunLoop.mainRunLoop().run()
+//        NSRunLoop.mainRunLoop().run()
+        dispatch_group_wait(acceptGroup, DISPATCH_TIME_FOREVER)
     }
 
     

@@ -15,7 +15,14 @@ do {
 
     print("Server started on port 8080...")
     try server.serve { (str, connection) in
-        let message         = "Hello World"
+        
+        if let str = str as? String {
+            connection.write(str)
+        }
+        
+        // WEB SERVER
+        /*
+        let message         = str != nil ? (str as! String) : "Hello World"
         let contentLength   = message.utf8.count
         
         connection.write("HTTP/1.1 200 OK\n")
@@ -26,6 +33,7 @@ do {
         
         connection.write(message)
         connection.close()
+        */
     }
     
 }
