@@ -10,10 +10,9 @@ import Foundation
 import Darwin
 
 public class Socket: Hashable {
-    public var onClose:((connection:Socket) -> Void)?
-    public var handler:((AnyObject?, Socket) -> Void)?
+    public var closeHandler:(() -> Void)?
+    public var descriptor:SocketDescriptor
     
-    public let descriptor:SocketDescriptor
     var blocking:Bool {
         get {
             return fcntl(descriptor, F_GETFL, 0) & O_NONBLOCK == 0
@@ -119,10 +118,16 @@ public class Socket: Hashable {
     }
     
     public func close() {
+        
+        guard descriptor > 0 else {
+            return
+        }
+        
         SocketFunctions.Shutdown(self.descriptor, Int32(SHUT_RDWR))
         SocketFunctions.Close(self.descriptor)
         
-        self.onClose?(connection:self)
+        descriptor = -1
+        closeHandler?()
     }
 }
 
