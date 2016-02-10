@@ -32,24 +32,31 @@ public class Server {
         try listener.listen(1000)
     }
     
+    private var source:dispatch_source_t?
+    private let sourceQueue = dispatch_queue_create("com.pilot.connection.source.queue", DISPATCH_QUEUE_CONCURRENT)
+    
     public func serve(block: (AnyObject?, Socket) -> Void) throws {
-        dispatch_group_async(acceptGroup, acceptQueue) { [weak self] in
-            guard let _self = self else { fatalError("No Self") }
-            
-            while let incoming = try? _self.listener.accept() {
-
-                incoming.handler = block
-                incoming.onClose = { connection in
-                    _self.remove(connection)
+        source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, UInt(listener.descriptor), 0, sourceQueue)
+        if let source = source {
+            dispatch_source_set_event_handler(source) { [weak self] in
+                guard let _self = self else { fatalError("No Self") }
+                
+                if let incoming = try? _self.listener.accept() {
+                    
+                    incoming.handler = block
+                    incoming.onClose = { connection in
+                        _self.remove(connection)
+                    }
+                    
+                    _self.read(incoming)
                 }
                 
-                _self.read(incoming)
             }
             
-            _self.stop()
+            dispatch_resume(source)
         }
-
-        dispatch_group_wait(acceptGroup, DISPATCH_TIME_FOREVER)
+        
+        dispatch_main()
     }
 
     
@@ -70,8 +77,10 @@ public class Server {
         sync {
             self.clients.insert(connection)
         }
-        
-        dispatch_group_async(handleGroup, handleQueue) {
+
+        let isolation = dispatch_queue_create("com.socket.connection.\(connection.descriptor)", DISPATCH_QUEUE_SERIAL)
+
+        dispatch_group_async(handleGroup, isolation) {
             while let chars:[CChar] = try? connection.read(1024) {
                 
                 let str =  NSString(bytes: chars, length: chars.count, encoding: NSUTF8StringEncoding)
