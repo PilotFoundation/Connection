@@ -14,12 +14,7 @@ do {
     print("Server running at \(server.address) : \(server.port)")
     try server.serve { (str, connection) in
         
-        if let str = str as? String {
-            connection.write(str)
-        }
-        
         // WEB SERVER
-        /*
         let message         = str != nil ? (str as! String) : "Hello World"
         let contentLength   = message.utf8.count
         
@@ -31,7 +26,6 @@ do {
         
         connection.write(message)
         connection.close()
-        */
     }
     
 }
