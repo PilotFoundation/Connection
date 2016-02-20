@@ -6,7 +6,11 @@
 //  Copyright © 2015 Wess Cope. All rights reserved.
 //
 
-import Darwin
+#if os(Linux)
+    import Glibc 
+#else
+    import Darwin
+#endif
 
 class Data {
     let bytes:UnsafeMutablePointer<Int8>

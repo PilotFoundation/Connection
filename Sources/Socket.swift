@@ -7,7 +7,13 @@
 //
 
 import Foundation
-import Darwin
+
+#if os(Linux)
+    import Glibc 
+#else
+    import Darwin
+#endif
+
 
 public class Socket: Hashable {
     public var closeHandler:(() -> Void)?
