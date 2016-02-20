@@ -7,9 +7,30 @@
 //
 
 import Foundation
-import Darwin
+
+
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
 
 public struct SocketFunctions {
+    #if os(Linux)
+    public static let Create   = socket
+    public static let Accept   = accept
+    public static let Bind     = bind
+    public static let Close    = close
+    public static let Listen   = listen
+    public static let Read     = read
+    public static let Send     = send
+    public static let Write    = write
+    public static let Shutdown = shutdown
+    public static let Select   = select
+    public static let Pipe     = pipe
+    public static let Option   = Darwin.setsockopt
+
+    #else
     public static let Create   = Darwin.socket
     public static let Accept   = Darwin.accept
     public static let Bind     = Darwin.bind
@@ -22,6 +43,8 @@ public struct SocketFunctions {
     public static let Select   = Darwin.select
     public static let Pipe     = Darwin.pipe
     public static let Option   = Darwin.setsockopt
+    #endif 
+
     public static let STREAM   = SOCK_STREAM
     public static let BACKLOG  = SOMAXCONN
     public static let NOSIGNAL = 0
@@ -39,7 +62,7 @@ public struct SocketError : ErrorType, CustomStringConvertible {
     public let function:String
     public let error:Int32
     
-    public init(function:String = __FUNCTION__) {
+    public init(function:String = #function) {
         self.function   = function
         self.error      = errno
     }

@@ -52,10 +52,13 @@ public class Socket: Hashable {
             throw SocketError(function:"SocketFunctions.Option()")
         }
         
+        #if os(Linux)
+        #else 
         var nosig:Int32 = 1
         guard SocketFunctions.Option(descriptor, SOL_SOCKET, SO_NOSIGPIPE, &nosig, socklen_t(sizeof(Int32))) != -1 else {
             throw SocketError(function:"SocketFunctions.Option()")
         }
+        #endif
     }
     
     public init(descriptor:SocketDescriptor) {
