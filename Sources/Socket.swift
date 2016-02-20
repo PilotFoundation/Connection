@@ -50,7 +50,12 @@ public class Socket: Hashable {
     public var hashValue: Int { return Int(self.descriptor) }
     
     public init() throws {
+        #if os(Linux)        
+        descriptor = SocketFunctions.Create(AF_INET, Int32(SocketFunctions.STREAM.rawValue), IPPROTO_TCP)
+        #else 
         descriptor = SocketFunctions.Create(AF_INET, SocketFunctions.STREAM, IPPROTO_TCP)
+        #endif 
+
         assert(descriptor > 0)
         
         var buffer:Int32 = 1
