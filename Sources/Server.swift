@@ -8,6 +8,12 @@
 
 import Foundation
 
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
 public struct Client : Hashable {
     public let socket:Socket
     
