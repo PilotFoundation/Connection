@@ -51,7 +51,7 @@ public class Socket: Hashable {
     
     public init() throws {
         #if os(Linux)        
-        descriptor = SocketFunctions.Create(AF_INET, Int32(SocketFunctions.STREAM.rawValue), IPPROTO_TCP)
+        descriptor = SocketFunctions.Create(AF_INET, Int32(SocketFunctions.STREAM.rawValue), Int32(IPPROTO_TCP))
         #else 
         descriptor = SocketFunctions.Create(AF_INET, SocketFunctions.STREAM, IPPROTO_TCP)
         #endif 
