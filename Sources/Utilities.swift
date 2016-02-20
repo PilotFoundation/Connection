@@ -28,7 +28,7 @@ public struct SocketFunctions {
     public static let Shutdown = shutdown
     public static let Select   = select
     public static let Pipe     = pipe
-    public static let Option   = Darwin.setsockopt
+    public static let Option   = setsockopt
 
     #else
     public static let Create   = Darwin.socket
